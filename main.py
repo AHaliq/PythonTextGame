@@ -1,14 +1,4 @@
-from functools import reduce, partial
-
-alive = True
-
-class C:
-    
-    cb = [['┌','┐'],['└','┘']]
-    hb = '─'
-    vb = '│'
-    wall = '█'
-    empty = ' '
+from functools import partial
 
 def emptyBoard(w,h):
     return [[False] * h for col in range(w)]
@@ -16,7 +6,7 @@ def emptyBoard(w,h):
 def cloneBoard(b):
     return [[b[x][y] for y in range(len(b[x]))] for x in range(len(b))]
 
-def decorateBoardWalls(b):
+def decorateBorder(b):
     w = len(b) - 1
     h = len(b[0]) - 1
     for i in range(w + 1):
@@ -27,27 +17,38 @@ def decorateBoardWalls(b):
         b[w][i] = True
     return b
 
-def printHoriBorder(w, top = True):
-    i = 0 if top else 1
-    str = reduce(lambda a, c: a + C.hb, range(w), C.cb[i][0])
-    str += C.cb[i][1]
-    return str
+def printBoard(bori):
+    class C:
+        cb = [['┌','┐'],['└','┘']]
+        hb = '─'
+        vb = '│'
+        wall = '█'
+        empty = ' '
+    # characters
 
-def printBoard(b):
-    ph = partial(printHoriBorder, len(b))
+    b = [[C.wall if bori[x][y] else C.empty
+        for y in range(len(bori[x]))]
+        for x in range(len(bori))]
+    w = len(b)
+    # local variables
+
+    def ph(top = True):
+        i = 0 if top else 1
+        return f"{C.cb[i][0]}{C.hb * w}{C.cb[i][1]}"
+    # top bottom border subroutine
+
     print(ph())
+    # top border
     for y in range(len(b[0])):
-        str = C.vb
-        for x in range(len(b)):
-            str += C.wall if b[x][y] else C.empty
-        str += C.vb
-        print(str)
+        print(f"{C.vb}{''.join([b[x][y] for x in range(len(b))])}{C.vb}")
+    # mid content
     print(ph(False))
+    # bottom border
         
-
+alive = True
 while alive:
     b = emptyBoard(5,5)
-    c = decorateBoardWalls(cloneBoard(b))
+    c = decorateBorder(cloneBoard(b))
     printBoard(b)
     printBoard(c)
     alive = False
