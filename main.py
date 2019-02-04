@@ -1,46 +1,52 @@
+from functools import reduce, partial
+
 alive = True
+
+class C:
+    cb = [['┌','┐'],['└','┘']]
+    hb = '─'
+    vb = '│'
+    wall = '█'
+    empty = ' '
 
 def emptyBoard(w,h):
     return list(map(lambda x: [False] * h, [False] * w))
 
+def cloneBoard(b):
+    return list(map(lambda x: b[x].copy(), range(len(b))))
+
 def decorateBoardWalls(b):
-    w = len(b)
-    h = len(b[0])
-    for i in range(w):
+    w = len(b) - 1
+    h = len(b[0]) - 1
+    for i in range(w + 1):
         b[i][0] = True
-        b[i][h-1] = True
-    for i in range(h):
+        b[i][h] = True
+    for i in range(h + 1):
         b[0][i] = True
-        b[w-1][i] = True
+        b[w][i] = True
     return b
 
+def printHoriBorder(w, top = True):
+    i = 0 if top else 1
+    str = reduce(lambda a, c: a + C.hb, range(w), C.cb[i][0])
+    str += C.cb[i][1]
+    return str
+
 def printBoard(b):
-    str = '┌'
-    for x in range(len(b)):
-        str += '─'
-    str += '┐'
-    print(str)
-    # print top border
-
+    ph = partial(printHoriBorder, len(b))
+    print(ph())
     for y in range(len(b[0])):
-        str = '│'
+        str = C.vb
         for x in range(len(b)):
-            str += '#' if b[x][y] else ' '
-        str += '│'
+            str += C.wall if b[x][y] else C.empty
+        str += C.vb
         print(str)
-    # print side border and content
-
-    str = '└'
-    for x in range(len(b)):
-        str += '─'
-    str += '┘'
-    print(str)
-    # print top border
+    print(ph(False))
         
 
 while alive:
     b = emptyBoard(5,5)
-    c = decorateBoardWalls(b)
+    c = decorateBoardWalls(cloneBoard(b))
     printBoard(b)
     printBoard(c)
     alive = False
