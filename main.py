@@ -3,6 +3,7 @@ from functools import reduce, partial
 alive = True
 
 class C:
+    
     cb = [['┌','┐'],['└','┘']]
     hb = '─'
     vb = '│'
@@ -10,10 +11,10 @@ class C:
     empty = ' '
 
 def emptyBoard(w,h):
-    return list(map(lambda x: [False] * h, [False] * w))
+    return [[False] * h for col in range(w)]
 
 def cloneBoard(b):
-    return list(map(lambda x: b[x].copy(), range(len(b))))
+    return [[b[x][y] for y in range(len(b[x]))] for x in range(len(b))]
 
 def decorateBoardWalls(b):
     w = len(b) - 1
