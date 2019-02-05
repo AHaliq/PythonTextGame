@@ -61,28 +61,20 @@ def getAllEmptyTiles(b, r = [], p = None):
                 opts.append((x,y))
     return opts
 
-"""
-@param  b   must have an empty tile otherwise infinite loop
-"""
-def getAnEmptyTile(b, r = []):
-    return getRandomEmptyTiles(b,1,r)[0]
-
-def getRobots(b):
-    (w,h) = getDims(b)
-    bots = []
-    for x in range(w):
-        for y in range(h):
-            if b[x][y] == Tile.robot:
-                bots.append((x,y))
-    return bots
+def getAnEmptyTile(b, r = [], p = None):
+    return getRandomEmptyTiles(b,1,r,p)[0]
 
 def alignWallCollision(b, p, moveX, moveY):
     (x,y) = p
-    destBlocked = b[x + moveX][y + moveY] == Tile.wall
-    if(b[x + moveX][y] == Tile.wall or destBlocked):
+    if(b[x + moveX][y] == Tile.wall):
         moveX = 0
-    if(b[x][y + moveY] == Tile.wall or destBlocked):
+    if(b[x][y + moveY] == Tile.wall):
         moveY = 0
+    if b[x + moveX][y + moveY] == Tile.wall:
+        if randint(0,1) == 0:
+            moveX = 0
+        else:
+            moveY = 0
     return (x + moveX, y + moveY)
 
 # map utils -------------------------------------
