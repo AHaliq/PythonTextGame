@@ -6,6 +6,7 @@ class Tile:
     empty = ' '
     robot = 'r'
     player = 'P'
+    death = '░'
 
 def emptyBoard(w,h):
     return [[Tile.empty] * h for col in range(w)]
@@ -167,20 +168,20 @@ def printBoard(bori, r = [], p = None):
 
 # rendering -------------------------------------
 
-b = insertWallTile(insertWallBorder(emptyBoard(20,10)),20)
+b = insertWallTile(emptyBoard(20,10),20)
 p = getAnEmptyTile(b)
 r = getRandomEmptyTiles(b, 4, [], p)
 printBoard(b, r, p)
 while True:
     p = getUserMove(b,p)
     r = moveRobots(b,r,p)
-    # check player robot collision
+    if p in r:
+        Tile.player = Tile.death
+        printBoard(b,r,p)
+        print("you loose")
+        break
     r = checkRRCollision(r)
     printBoard(b,r,p)
     if len(r) == 0:
         print("you win")
         break
-
-# TODO fix wall collision
-# player robot collision
-# win/loose state
