@@ -65,11 +65,7 @@ def getAllEmptyTiles(b, r = [], p = None):
 @param  b   must have an empty tile otherwise infinite loop
 """
 def getAnEmptyTile(b, r = []):
-    while True:
-        x = randint(0,len(b) - 1)
-        y = randint(0,len(b[0]) - 1)
-        if(b[x][y] == Tile.empty and not (x,y) in r):
-            return (x,y)
+    return getRandomEmptyTiles(b,1,r)[0]
 
 def getRobots(b):
     (w,h) = getDims(b)
@@ -80,6 +76,15 @@ def getRobots(b):
                 bots.append((x,y))
     return bots
 
+def alignWallCollision(b, p, moveX, moveY):
+    (x,y) = p
+    destBlocked = b[x + moveX][y + moveY] == Tile.wall
+    if(b[x + moveX][y] == Tile.wall or destBlocked):
+        moveX = 0
+    if(b[x][y + moveY] == Tile.wall or destBlocked):
+        moveY = 0
+    return (x + moveX, y + moveY)
+
 # map utils -------------------------------------
 
 def moveRobots(b,r,p):
@@ -88,14 +93,60 @@ def moveRobots(b,r,p):
     for (x,y) in r:
         moveX = 1 if px > x else (-1 if px < x else 0)
         moveY = 1 if py > y else (-1 if py < y else 0)
-        if(b[x + moveX][y] == Tile.wall):
-            moveX = 0
-        if(b[x][y + moveY] == Tile.wall):
-            moveY = 0
-        nr.append((x + moveX, y + moveY))
+        nr.append(alignWallCollision(b, (x,y), moveX, moveY))
+    return nr
+
+def checkRRCollision(r):
+    d = {}
+    nr = []
+    for x in r:
+        if x in d.keys():
+            d[x] += 1
+        else:
+            d[x] = 1
+    for x in d.keys():
+        if d[x] == 1:
+            nr.append(x)
     return nr
 
 # robot utils -----------------------------------
+
+def getUserMove(b,p):
+    (x,y) = p
+    (w,h) = getDims(b,True)
+    moveX = 0
+    moveY = 0
+    while True:
+        m = input('make your move : ')
+        if m in ['q','w','e','a','s','d','z','x','c']:
+            if m in ['q','a','z']:
+                moveX = -1
+            elif m in ['e','d','c']:
+                moveX = 1
+            else:
+                moveX = 0
+            if m in ['q','w','e']:
+                moveY = -1
+            elif m in ['z','x','c']:
+                moveY = 1
+            else:
+                moveY = 0
+            # get moveXY
+            if ((moveX == -1 and x == 0) or
+            (moveX == 1 and x == w) or
+            (moveY == -1 and y == 0) or
+            (moveY == 1 and y == h)):
+                print('move out of bounds, pick another')
+                # detect out of bounds
+            else:
+                p = alignWallCollision(b, p, moveX, moveY)
+                # valid move
+                break
+        else:
+            print('invalid move, choose: q,w,e,a,s,d,z,x,c')
+    return p
+
+# player ----------------------------------------
 
 def printBoard(bori, r = [], p = None):
     class C:
@@ -124,17 +175,20 @@ def printBoard(bori, r = [], p = None):
 
 # rendering -------------------------------------
 
-alive = True
 b = insertWallTile(insertWallBorder(emptyBoard(20,10)),20)
 p = getAnEmptyTile(b)
 r = getRandomEmptyTiles(b, 4, [], p)
-while alive:
-    printBoard(b, r, p)
+printBoard(b, r, p)
+while True:
+    p = getUserMove(b,p)
     r = moveRobots(b,r,p)
+    # check player robot collision
+    r = checkRRCollision(r)
     printBoard(b,r,p)
-    alive = False
+    if len(r) == 0:
+        print("you win")
+        break
 
-# robot collision
-# player motion
+# TODO fix wall collision
 # player robot collision
-# win state
+# win/loose state
